@@ -1341,14 +1341,6 @@
             document.getElementById("share-modal").style.display = "none";
         }
 
-        // Close modal if clicking outside the content
-        window.onclick = function(event) {
-            let modal = document.getElementById("share-modal");
-            if (event.target === modal) {
-                closeShareModal();
-            }
-        };
-
         function openIosInstallModal() {
             let modal = document.getElementById("ios-install-modal");
             modal.style.display = "flex";
@@ -1371,9 +1363,13 @@
 
         // Close modal if clicking outside the content
         window.onclick = function(event) {
-            let modal = document.getElementById("ios-install-modal");
-            if (event.target === modal) {
+            let iosModal = document.getElementById("ios-install-modal");
+            if (event.target === iosModal) {
                 closeIosInstallModal();
+            }
+            let shareModal = document.getElementById("share-modal");
+            if (event.target === shareModal) {
+                closeShareModal();
             }
         };
     </script>
