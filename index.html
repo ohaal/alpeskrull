@@ -6,10 +6,6 @@
             return /iphone|ipad|ipod/i.test(navigator.userAgent);
         }
 
-        function isSafari() {
-            return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-        }
-
         let deferredPrompt; // Store the install event
         window.addEventListener("beforeinstallprompt", (event) => {
             event.preventDefault(); // Prevent automatic showing
@@ -17,7 +13,7 @@
         });
 
         function triggerPWAInstall() {
-            if (isIOS() && isSafari()) {
+            if (isIOS()) {
                 openIosInstallModal();
             }
             else {
