@@ -872,9 +872,8 @@
             document.addEventListener("DOMContentLoaded", function () {
                 // Get today's date in YYYY-MM-DD format
                 let today = new Date().toISOString().split('T')[0];
-                today = '2025-03-03'; // TODO: REMOVE ME
 
-                if (today > '2025-03-01') today = '2025-03-01';
+                if (today > '2025-03-01' || today < '2025-02-22') today = '2025-03-01';
 
                 // Select all day elements
                 let spanDays = document.querySelectorAll("span.day");
@@ -895,7 +894,7 @@
                     }
 
                     // Only add links for past days
-                    if (dayDate < today && dayDate <= '2025-02-28') {
+                    if (dayDate < today && dayDate < '2025-03-01') {
                         let dateObj = new Date(dayDate);
                         let dayName = weekdays[dateObj.getDay()]; // Get the weekday name
                         previousDaysHTML += `<a href="#" class="daylinks" onclick="showDay(event, '${dayDate}')">${dayName}</a> `;
