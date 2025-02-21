@@ -788,63 +788,7 @@
                 Kanskje du skal prøve noe annet enn snitzel til lunsj?</p>
             <p><b>Funfact:</b> Saalbach er kjent for sin deilige Kaiserschmarrn, en type søt pannekake.</p>
             <p><i>Og du, ikke glem chællengene da</i> 📸</p>
-            <table class="highscore">
-                <tr>
-                    <th>Rank</th>
-                    <th>Navn</th>
-                    <th>Skår</th>
-                </tr>
-                <tr>
-                    <td>1🥇</td>
-                    <td>Anita</td>
-                    <td>0</td>
-                </tr>
-                <tr>
-                    <td>2🥈</td>
-                    <td>Fredrik</td>
-                    <td>0</td>
-                </tr>
-                <tr>
-                    <td>3🥉</td>
-                    <td>Gunnhild</td>
-                    <td>0</td>
-                </tr>
-                <tr>
-                    <td>4</td>
-                    <td>Jesper</td>
-                    <td>0</td>
-                </tr>
-                <tr>
-                    <td>5</td>
-                    <td>Julie</td>
-                    <td>0</td>
-                </tr>
-                <tr>
-                    <td>6</td>
-                    <td>Lars</td>
-                    <td>0</td>
-                </tr>
-                <tr>
-                    <td>7</td>
-                    <td>Miriam</td>
-                    <td>0</td>
-                </tr>
-                <tr>
-                    <td>8</td>
-                    <td>Oddbjørn</td>
-                    <td>0</td>
-                </tr>
-                <tr>
-                    <td>9</td>
-                    <td>Ove</td>
-                    <td>0</td>
-                </tr>
-                <tr>
-                    <td>10</td>
-                    <td>Simen</td>
-                    <td>0</td>
-                </tr>
-            </table>
+            <div class="highscoreTable"></div>
         </span>
 
         <span class="day" data-date="2025-02-27"><!-- torsdag -->
@@ -908,6 +852,10 @@
 
                 // Update the previousDays section
                 previousDaysContainer.innerHTML = previousDaysHTML;
+
+                // Replace highscoretable divs with actual highscore tables
+                let highscoreTables = document.querySelectorAll(".highscoreTable");
+                highscoreTables.forEach(highscoreTable => highscoreTable.innerHTML = generateHighScoreTable());
             });
 
             // Function to show the correct day when clicking a link
@@ -925,6 +873,34 @@
                         day.classList.remove("show-day");
                     }
                 });
+            }
+
+            function generateHighScoreTable() {
+                let medals = ['🥇','🥈','🥉'];
+                let highscores = [
+                    { name: "Anita", score: 0 },
+                    { name: "Fredrik", score: 0 },
+                    { name: "Gunnhild", score: 0 },
+                    { name: "Jesper", score: 0 },
+                    { name: "Julie", score: 0 },
+                    { name: "Lars", score: 0 },
+                    { name: "Miriam", score: 0 },
+                    { name: "Oddbjørn", score: 0 },
+                    { name: "Ove", score: 0 },
+                    { name: "Simen", score: 0 },
+                ];
+                let highscoresHtmlPrefix = '<table class="highscore">'
+                    + '<tr>'
+                    + '<th>Rank</th>'
+                    + '<th>Navn</th>'
+                    + '<th>Skår</th>'
+                    + '</tr>';
+                let highscoresHtml = highscores.sort((a, b) => b.score - a.score)
+                    .map((highscorer, i) => `<tr><td>${medals[i] || i}</td><td>${highscorer.name}</td><td>${highscorer.score}</td></tr>`)
+                    .join('');
+                let highscoresHtmlSuffix = '</table>'
+
+                return highscoresHtmlPrefix + highscoresHtml + highscoresHtmlSuffix;
             }
         </script>
     </section>
