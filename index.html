@@ -896,7 +896,7 @@
                     + '<th>Skår</th>'
                     + '</tr>';
                 let highscoresHtml = highscores.sort((a, b) => b.score - a.score)
-                    .map((highscorer, i) => `<tr><td>${medals[i] || i}</td><td>${highscorer.name}</td><td>${highscorer.score}</td></tr>`)
+                    .map((highscorer, i) => `<tr><td>${i + (medals[i] || '')}</td><td>${highscorer.name}</td><td>${highscorer.score}</td></tr>`)
                     .join('');
                 let highscoresHtmlSuffix = '</table>'
 
