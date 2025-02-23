@@ -1208,20 +1208,75 @@
                 Chællenges
             </h4>
             <ul class="styled-list">
-                <li>Ta et bilde av noen som sover (bonuspoeng for morsom sovestilling)</li>
-                <li>Ta en selfie med en skiløper i en HELT annen outfit enn deg (f.eks. noen i retro-antrekk eller full racingdrakt)</li>
-                <li>Ta et bilde der du later som du har satt deg fast i snøen</li>
-                <li>Ta en “superhelt-landing” i snøen etter et hopp</li>
-                <li>Fang det morsomste skiltet eller advarselen du ser i bakken</li>
-                <li>Ta et bilde av noen i gruppa som drikker med skibrillene på</li>
-                <li>Bilde av en hel gruppe som skåler – helst med en fremmed med i bildet</li>
-                <li>Ta et bilde av en ny venn dere møter på afterski</li>
-                <li>Fang det rareste dance-movet på dansegulvet</li>
-                <li>Finn en person med en skikkelig kul (eller merkelig) lue og ta et bilde med dem</li>
-                <li>Ta et bilde av deg selv med den beste utsikten på turen</li>
-                <li>Fang et ekte “filmøyeblikk” – noen som ler, skåler eller gjør noe spontant og gøy</li>
+                <li>
+                    <input type="checkbox" id="challenge-1" data-id="1">
+                    <label for="challenge-1">Ta et bilde av noen som sover (bonuspoeng for morsom sovestilling)</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="challenge-2" data-id="2">
+                    <label for="challenge-2">Ta en selfie med en skiløper i en HELT annen outfit enn deg (f.eks. noen i retro-antrekk eller full racingdrakt)</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="challenge-3" data-id="3">
+                    <label for="challenge-3">Ta et bilde der du later som du har satt deg fast i snøen</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="challenge-4" data-id="4">
+                    <label for="challenge-4">Ta en “superhelt-landing” i snøen etter et hopp</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="challenge-5" data-id="5">
+                    <label for="challenge-5">Fang det morsomste skiltet eller advarselen du ser i bakken</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="challenge-6" data-id="6">
+                    <label for="challenge-6">Ta et bilde av noen i gruppa som drikker med skibrillene på</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="challenge-7" data-id="7">
+                    <label for="challenge-7">Bilde av en hel gruppe som skåler – helst med en fremmed med i bildet</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="challenge-8" data-id="8">
+                    <label for="challenge-8">Ta et bilde av en ny venn dere møter på afterski</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="challenge-9" data-id="9">
+                    <label for="challenge-9">Fang det rareste dance-movet på dansegulvet</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="challenge-10" data-id="10">
+                    <label for="challenge-10">Finn en person med en skikkelig kul (eller merkelig) lue og ta et bilde med dem</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="challenge-11" data-id="11">
+                    <label for="challenge-11">Ta et bilde av deg selv med den beste utsikten på turen</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="challenge-12" data-id="12">
+                    <label for="challenge-12">Fang et ekte “filmøyeblikk” – noen som ler, skåler eller gjør noe spontant og gøy</label>
+                </li>
             </ul>
         </div>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const checkboxes = document.querySelectorAll(".styled-list input[type='checkbox']");
+    
+                // Load saved checkbox state
+                checkboxes.forEach(checkbox => {
+                    const id = checkbox.dataset.id;
+                    const checked = localStorage.getItem(`challenge-${id}`) === "true";
+                    checkbox.checked = checked;
+                });
+    
+                // Save state of each checkbox when saved
+                checkboxes.forEach(checkbox => {
+                    checkbox.addEventListener("change", function () {
+                        localStorage.setItem(`challenge-${this.dataset.id}`, this.checked);
+                    });
+                });
+            });
+        </script>
     </section>
     
     <section id="history">
@@ -1354,6 +1409,5 @@
 </html>
 <!--
 TODO:
-- Generere highscore-tabell fra en .json-fil eller lignende, gjenbruke tabell i 2025-03-01
 - (neste år?) Deling av posisjon i app, og visning av posisjon til deltakere
 -->
