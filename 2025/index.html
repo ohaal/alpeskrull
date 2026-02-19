@@ -1,0 +1,1469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>
+        function isIOS() {
+            return /iphone|ipad|ipod/i.test(navigator.userAgent);
+        }
+
+        let deferredPrompt; // Store the install event
+        window.addEventListener("beforeinstallprompt", (event) => {
+            event.preventDefault(); // Prevent automatic showing
+            deferredPrompt = event; // Store it for later
+        });
+
+        function triggerPWAInstall() {
+            if (isIOS()) {
+                openIosInstallModal();
+            }
+            else {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt(); // Show the install prompt
+    
+                    deferredPrompt.userChoice.then((choiceResult) => {
+                        if (choiceResult.outcome === "accepted") {
+                            console.log("User accepted the PWA install");
+                        } else {
+                            console.log("User dismissed the PWA install");
+                        }
+                        deferredPrompt = null; // Reset after use
+                    });
+                } else {
+                    console.log("Install prompt not available yet.");
+                }
+            }
+        }
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alpeskrull</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        /* BEGIN -- NAVIGATION */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        nav {
+            width: 100%;
+            background-color: #007AFF;
+            padding: 10px 0;
+            position: fixed;
+            bottom: 0;
+            display: flex;
+            justify-content: space-around;
+            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
+        }
+        nav ul {
+            list-style: none;
+            display: flex;
+            padding: 0;
+            margin: 0;
+            width: 100%;
+            justify-content: space-around;
+        }
+        nav ul li {
+            flex: 1;
+            text-align: center;
+        }
+        nav a {
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+            display: block;
+            padding: 10px;
+            font-size: 1.2em;
+        }
+        nav a.active {
+            background-color: rgba(255, 255, 255, 0.3); /* Light highlight */
+            border-radius: 5px;
+        }
+        
+        section {
+            display: none;
+            width: 90%;
+            max-width: 600px;
+            padding: 10px;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            margin: 10px auto 40px;
+        }
+        section.active {
+            display: block;
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+        ul {
+            margin-top: 2px;
+        }
+        h4 {
+            margin-bottom: 2px;
+        }
+        a {
+            color: #007AFF;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+        }
+        @media (max-width: 480px) {
+            nav a {
+                font-size: 1em;
+                padding: 8px;
+            }
+        }
+        /* END -- NAVIGATION */
+
+        /* BEGIN -- TODAY */
+        span.day {
+            display: none;
+        }
+
+        span.day.show-day {
+            display: block;
+        }
+
+        #previousDays {
+            display: flex;
+            justify-content: center;
+            gap: 6px; /* Slightly reduced gap between buttons */
+            margin-top: 10px;
+            overflow-x: auto; /* Allow scrolling if needed */
+            padding: 0; /* Ensure no extra padding around the container */
+        }
+
+        #previousDays a {
+            text-decoration: none;
+            font-size: 11px; /* Slightly smaller font */
+            font-weight: 500;
+            padding: 5px 5px; /* Consistent padding for all states */
+            border-radius: 10px; /* Keeps soft-rounded edges */
+            background-color: #f0f0f0;
+            color: #333;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            display: inline-block;
+            box-sizing: border-box; /* Ensures padding and borders are part of the total width */
+        }
+
+        #previousDays a:hover {
+            background-color: #ddd;
+        }
+
+        #previousDays a.active-day-btn {
+            background-color: #007AFF; /* iOS-like blue */
+            color: white;
+            font-weight: bold;
+            border: 2px solid #005ecb;
+            box-shadow: 0px 4px 8px rgba(0, 122, 255, 0.3);
+        }
+
+        .highscore {
+            width: 100%;
+            max-width: 400px; /* Limits table width for a clean look */
+            margin: 20px auto;
+            border-collapse: collapse;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
+            background-color: white;
+        }
+
+        .highscore th {
+            background-color: #007AFF; /* iOS-like blue */
+            color: white;
+            padding: 12px;
+            font-size: 14px;
+            text-align: left;
+        }
+
+        .highscore td {
+            padding: 10px;
+            font-size: 14px;
+            text-align: left;
+            color: #333;
+            border-bottom: 1px solid #ddd; /* Subtle separator */
+        }
+
+        .highscore tr:nth-child(even) {
+            background-color: #f8f8f8; /* Light gray for alternating rows */
+        }
+
+        /* Highlight top scorer */
+        .highscore tr:nth-child(2) td {
+            font-weight: bold;
+            color: #007AFF;
+        }
+
+        /* Last row rounded corners */
+        .highscore tr:last-child td {
+            border-bottom: none;
+        }
+        /* END -- TODAY */
+
+        /* BEGIN -- FLIGHTS */
+        /* Container for the entire flight information section */
+        #flights {
+            padding: 20px;
+            background-color: #f4f4f9;
+        }
+
+        /* Wrapper for the entire flight information block */
+        .flight-info-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 20px; /* Space between each flight block */
+        }
+
+        /* Individual flight detail block (including icon, date, and flight info) */
+        .flight-detail-block {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            border: 1px solid #ddd; /* Optional border around each flight block */
+            padding: 15px;
+            border-radius: 8px;
+            background-color: #fff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Inner wrapper for flight info (icon and date) */
+        .flight-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Icon and date styling */
+        .flight-header-icon {
+            display: flex;
+            align-items: center;
+        }
+
+        /* Styling for the flight icon */
+        .material-icons {
+            font-size: 30px;
+            color: #0077cc;
+        }
+
+        /* Date heading styling */
+        .flight-date {
+            font-size: 16px;
+            font-weight: bold;
+            margin-left: 4px;
+        }
+
+        /* Flight number and airline text styling */
+        .flight-info-caption {
+            font-size: 14px;
+            color: #666;
+            margin-left: 28px;
+            margin-top: -8px;
+            margin-bottom: 8px;
+        }
+
+        /* Flight-time list styling */
+        .flight-time-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        /* Styling for each individual flight detail (departure time, duration, etc.) */
+        .flight-time-item {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .flight-time-item p {
+            margin: 0;
+            font-size: 14px;
+        }
+
+        /* Removing margins where specified */
+        .no-margin {
+            margin: 0;
+        }
+
+        /* Departure and duration times styling */
+        .departure-time {
+            font-size: 14px;
+            color: #333;
+        }
+
+        /* Styling for flight duration text */
+        .flight-duration p {
+            font-size: 12px !important; /* Smaller font size for duration */
+            color: #0077cc !important ; /* Optional color for the duration text */
+            font-weight: normal !important; /* Make it lighter to contrast with the other times */
+            margin: 0;
+        }
+
+
+        /* Mirrored icon for return flight */
+        .material-icons[style*="scaleX(-1)"] {
+            transform: scaleX(-1);
+        }
+
+        /* Hover effect for flight time list items */
+        .flight-time-item:hover {
+            background-color: #f0f8ff;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        /* Header styling for the "Flight Information" section */
+        #flights h2 {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        /* Styling for the introductory paragraph (optional text) */
+        #flights p {
+            font-size: 16px;
+            color: #666;
+            margin-top: 10px;
+        }
+        /* END -- FLIGHTS */
+
+        /* BEGIN -- HOTEL PICTURE CAROUSEL */
+        .carousel {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin: auto;
+            overflow: hidden;
+        }
+        .carousel img {
+            width: 100%;
+            display: none;
+        }
+        .carousel img.activepic {
+            display: block;
+        }
+        .carousel button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+        }
+        .carousel .prev {
+            left: 10px;
+        }
+        .carousel .next {
+            right: 10px;
+        }
+        /* END -- HOTEL PICTURE CAROUSEL */
+
+        /* BEGIN -- DINNER */
+        .dinner-day {
+            border: 1px solid #ddd; /* Light gray border */
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px; /* Spacing between days */
+            background-color: #fff; /* White background */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+        }
+
+        .dinner-day h3 {
+            margin-top: 0;
+            color: #007AFF; /* Stylish blue color */
+        }
+
+        .dinner-day a {
+            text-decoration: none;
+            color: #007AFF; /* Match heading color */
+            font-weight: bold;
+        }
+
+        .dinner-day a:hover {
+            text-decoration: underline;
+        }
+
+        .dinner-day p {
+            color: #555; /* Slightly darker text for readability */
+        }
+
+        .highlight-today {
+            background-color: #fffae6; /* Light yellow background */
+            border: 2px solid #ffcc00; /* Gold border */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        /* END -- DINNER */
+
+        /* START -- BARS */
+        /* Grid layout for bars */
+        .bars-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            max-width: 1000px;
+            margin: auto;
+        }
+
+        /* Individual Bar Card */
+        .bar-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: left;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .bar-card:hover {
+            transform: scale(1.05);
+        }
+
+        /* Image Styling */
+        .bar-card img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+
+        /* Bar Info */
+        .bar-info {
+            padding: 15px;
+        }
+
+        .bar-info h3 {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .bar-info a {
+            text-decoration: none;
+            color: #d9534f;
+            transition: color 0.3s;
+        }
+
+        .bar-info a:hover {
+            color: #c9302c;
+        }
+        /* END -- BARS */
+
+        /* START -- SKIMAP */
+        .map-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        #ski-map {
+            width: 100%; /* Adjust as needed */
+            max-width: 800px; /* Change based on your layout */
+            cursor: crosshair;
+        }
+
+        #zoomed-map {
+            position: absolute;
+            width: 350px; /* Adjust size of zoom window */
+            height: 250px;
+            border: 2px solid white;
+            border-radius: 8px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.4);
+            display: none;
+            background-image: url('images/skiresort/skimap.jpg'); /* Use full-size map */
+            background-repeat: no-repeat;
+            background-size: 700%; /* Adjust zoom level */
+            pointer-events: none; /* Prevent interaction */
+        }
+        /* END -- SKIMAP */
+
+        /* START -- COMMON */
+        /* Styled Numbered List with class */
+        .styled-list {
+            list-style-type: decimal; /* Makes the list numbered */
+            padding-left: 10px; /* Minimal indentation from the left */
+            margin: 0; /* Remove default margin */
+            font-size: 1.1em; /* Adjust font size for readability */
+        }
+
+        .styled-list li {
+            margin-bottom: 10px; /* Adds space between list items */
+            line-height: 1.5; /* Adds some spacing between lines of text for better readability */
+        }
+
+        /* Non-numbered list styled with 🔹 emoji */
+        .cool-list {
+            padding-left: 0; /* Remove default indentation */
+            margin: 0; /* Remove default margin */
+            list-style-type: none; /* Remove default list bullets */
+        }
+
+        .cool-list li {
+            position: relative;
+            font-size: 1em; /* Adjust font size for the text */
+            line-height: 1.5; /* Adjust line height for proper spacing */
+            padding-left: 25px; /* Add space between emoji and text */
+            display: flex;
+            align-items: center; /* Vertically align the text and emoji */
+        }
+
+        .cool-list li::before {
+            content: "🔹"; /* Adds the 🔹 emoji before each list item */
+            position: absolute;
+            left: 0; /* Align emoji to the left */
+            font-size: 1.2em; /* Slightly smaller emoji size */
+            margin-top: 0.1em; /* Adjust for proper vertical alignment */
+        }
+        /* END -- COMMON */
+
+        /* START -- DOWNLOAD/SHARE BUTTON */
+        #download-btn, #share-btn {
+            position: fixed;
+            top: 7px;
+            background: white;
+            border: none;
+            padding: 6px;
+            border-radius: 50%;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #download-btn-inline {
+            top: 6px;
+            background: white;
+            border: none;
+            padding: 6px;
+            border-radius: 50%;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            display: inline-block;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #download-btn {
+            left: 10px; /* Top-left corner */
+        }
+
+        #share-btn {
+            right: 10px; /* Top-right corner */
+        }
+
+        .material-icons {
+            font-size: 24px;
+        }
+
+        /* Modal Background */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Modal Content */
+        .modal-content {
+            position: relative;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            max-width: 90%;
+            max-height: 90%;
+        }
+
+        /* QR Code Image */
+        .qr-image {
+            width: 80vw; /* Responsive size */
+            max-width: 400px; /* Prevents it from getting too large */
+        }
+
+        /* Close Button */
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 30px;
+            cursor: pointer;
+            color: black;
+        }
+
+        /* Modal Background (Hidden by Default) */
+        #ios-install-modal {
+            display: none; /* Hidden initially */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5); /* Dark overlay */
+            backdrop-filter: blur(5px); /* Smooth blur effect */
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        /* Ensure the modal appears when 'display: flex' is set */
+        #ios-install-modal.flex {
+            opacity: 1;
+        }
+
+        /* Modal Content Box */
+        .ios-modal-content {
+            background: white;
+            padding: 20px;
+            width: 90%;
+            max-width: 350px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+            position: relative;
+            transform: scale(0.9);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        /* When modal is shown, scale it up */
+        #ios-install-modal.flex .ios-modal-content {
+            transform: scale(1);
+        }
+
+        /* Close Button */
+        .ios-close-btn {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #888;
+            transition: color 0.3s;
+        }
+
+        .ios-close-btn:hover {
+            color: #333;
+        }
+
+        /* Modal Title */
+        .ios-modal-title {
+            font-size: 20px;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #222;
+        }
+
+        /* Modal Description */
+        .ios-modal-description {
+            font-size: 16px;
+            color: #555;
+            margin-bottom: 15px;
+        }
+
+        /* Instructions List */
+        .ios-instructions-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        /* Individual Instruction */
+        .ios-instruction {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            border-radius: 8px;
+            background: #f9f9f9;
+            margin-bottom: 10px;
+            font-size: 16px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        /* Icons */
+        .ios-icon {
+            font-size: 24px;
+            color: #007aff; /* iOS Blue */
+        }
+
+        /* Instruction Text */
+        .ios-instruction-text {
+            flex: 1;
+            text-align: left;
+        }
+        /* END -- DOWNLOAD/SHARE BUTTON */
+    </style>
+</head>
+<body>
+
+    <section id="today" class="active">
+        <!-- Download Button (Top Left) -->
+        <button id="download-btn" onclick="triggerPWAInstall()">
+            <span class="material-icons">download</span>
+        </button>
+
+        <!-- Share Button (Top Right) -->
+        <button id="share-btn" onclick="openShareModal()">
+            <span class="material-icons">share</span>
+        </button>
+        <center><h3 style="margin: 5px">📍 <a href="https://maps.app.goo.gl/fX4ZYPoJW6btm7Ku5?g_st=ac" target="_blank">POINTS OF INTEREST</a></h3></center>
+        <a href="https://geosphere.at/en/maps/weather-forecast#tab=chart&point_id=1520" target="_blank">
+            <img src="https://www.yr.no/nb/innhold/2-3323971/meteogram.svg" alt="Været i Saalbach" width="100%">
+        </a>
+        <div id="previousDays">
+        </div>
+        <span class="day" data-date="2025-02-22"><!-- lørdag -->
+            <h2>Velkommen!</h2>
+            <p>Endelig er vi samlet igjen for den 17. turen siden 2005 – en tradisjon like sterk som afterski og vonde leggær og lår! 😆</p>
+            <p>Denne gangen venter seks dager med puddersnø (slapseføre), spektakulære fjell, god mat og selvfølgelig legendariske afterski-øyeblikk.</p>
+            <p>Følg med i appen for nyttig info, dagens utfordringer og andre sprell! La oss gjøre denne turen historisk bra!</p>
+            <ul class="cool-list">
+                <li>Utfordringer og konkurranser (ta bilder 📸)</li>
+                <li>Premier 🏆</li>
+                <li>Og viktigst av alt – GOD stemning!</li>
+            </ul>
+            <p>Så da gjenstår det bare én ting å si:</p>
+            <p>"1-2-3 – Nå kosær vi vårs!" 🎿🍻</p>
+            <p>
+                <i>Trykk på
+                    <button id="download-btn-inline" onclick="triggerPWAInstall()"><span class="material-icons">download</span></button>
+                    øverst i venstre hjørne for å legge til appen på hjemskjermen din!
+                </i>
+            </p>
+        </span>
+
+        <span class="day" data-date="2025-02-23"><!-- søndag -->
+            <h2>Første dag i løypa!</h2>
+            <p>"Kor ska me gjør av oss kor ska me gå?".</p>
+            <p>Første dag i Saalbach og bakken venter på deg!</p>
+            <p>Kom deg ned til frokost (08:00-10:00) og få med deg planene for dagens tur.</p>
+            <p>De første heisene åpner klokken 08:00, så vi har ingen tid å miste!⛷️ Sjekk 🗺️ i appen for mer info.</p>
+            <p>Krysser fingrene for at Julie sitt ben holder og at hun får kjørt med de store gutta 🤞</p>
+            <p><b>Funfact:</b> Visste du at Saalbach er kjent som 'Home of Lässig', som betyr "hjemmet til avslappet moro"?</p>
+        </span>
+
+        <span class="day" data-date="2025-02-24"><!-- mandag -->
+            <h2>Endelig mandag!</h2>
+            <p>Ny dag gir nye muligheter til å utforske flere av løypene i Saalbach!</p>
+            <p>Etter tredobbelt norsk i skiskyting ble feiringen litt for mye for enkelte av oss. Heldigvis falt kveldsmaten i smak. 😵‍💫</p>
+            <p>Vi erfarte i går at det er om å gjøre å få kjørt så mye som mulig før lunsj, så planen i dag blir deretter.</p>
+            <p><b>Funfact:</b> Det går gratis skibusser mellom Saalbach og Hinterglemm, noe som gjør det enkelt å komme seg rundt.</p>
+            <p><i>men du, glöm inte titta på solen, det är gratis!</i> ☀️</p>
+        </span>
+
+        <span class="day" data-date="2025-02-25"><!-- tirsdag -->
+            <h2>Snømagi</h2>
+            <p>"Tirsdag er en ny sjanse til å gjøre fremskritt og nå dine mål."</p>
+            <p>Har du tatt en pinne for landet og sunget om søte Caroline? Hvis ikke er det på tide!</p>
+            <img src="https://media1.tenor.com/m/XZ50FxoHwawAAAAd/snow-dj.gif" alt="Snø-DJ">
+            <p><i>PS: Hører rykter om at det er en skjult skulptur i skogen, har du funnet den?</i></p>
+        </span>
+
+
+        <span class="day" data-date="2025-02-26"><!--onsdag -->
+            <h2>Hællæ Youtube</h2>
+            <p>Onsdag er en dag for å reflektere.</p>
+            <p>Hvis vi nå begynner å bli tomme for samtaleemner, så ta en prat med Ove, han har nok noen skrevet ned på en lapp i lomma si 🤓</p>
+            <img src="https://media1.tenor.com/m/KmEgxic3wfQAAAAC/sponge-nerd-spongebob.gif" alt="Ove finner tema">
+            <p><i>PS: Like & subscribe!</i></p>
+            <div class="highscoreTable"></div>
+            <p><a href="images/forelopig_highscore.png" target="_blank">Se oversikt her</a></p>
+        </span>
+
+        <span class="day" data-date="2025-02-27"><!-- torsdag -->
+            <h2>Eventyrdag</h2>
+            <p>Vi ønsker tøffingene lykke til på The Challenge.</p>
+            <p>Vi andre må finne oss en lunsjplass for å se på Klæbo gå inn til gull rett foran Edvin fra Sverige kl 12:30.</p>
+            <p>Nyt de lokale delikatessene i dag.</p>
+            <p>Kanskje du skal prøve noe annet enn snitzel til lunsj?</p>
+            <p><b>Funfact:</b> Saalbach er kjent for sin deilige Kaiserschmarrn, en type søt pannekake.</p>
+            <p><i>Og du, ikke glem de andre chællengene også da</i> 📸</p>
+            <div class="highscoreTable"></div>
+            <p><a href="images/forelopig_highscore.png" target="_blank">Se oversikt her</a></p>
+        </span>
+
+        <span class="day" data-date="2025-02-28"><!-- fredag -->
+            <h2>TGIF!</h2>
+            <p>Du merker det kanskje godt i låra? Det er lov å være litt sliten nå. Husk det er snart helg 🥳</p>
+	        <p>"Suksess er ikke endelig, fiasko er ikke fatalt: Det er motet til å fortsette som teller." – Winston Churchill</p>
+            <p>Mens noen må lese seg opp om pleiepenger, må andre finne forslag til afterski-låter.</p>
+            <img src="https://media1.tenor.com/m/OXiCH_Jq6BUAAAAd/ski.gif" alt="Sitteski">
+        </span>
+
+        <span class="day" data-date="2025-03-01"><!-- reisedag -->
+            <p><img src="images/diplom.png" alt="Diplom"></p>
+            <p>Etter en heftig innspurt snappet Julie en knepen seier foran en lilla teletubby.</p>
+            <p>Vi i redaksjonen takker for engasjementet, det hadde ikke blitt det samme uten deres bidrag.</p>
+            <div class="highscoreTable"></div>
+            <p><a href="images/endelig_highscore.png" target="_blank">Se oversikt her</a> <span style="font-size: 6px">Klagefrist 04.03.25 kl. 12:34</span></p>
+        </span>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                // Get today's date in YYYY-MM-DD format
+                let today = new Date().toISOString().split('T')[0];
+
+                if (today > '2025-03-01' || today < '2025-02-22') today = '2025-03-01';
+
+                // Select all day elements
+                let spanDays = document.querySelectorAll("span.day");
+
+                // Get the container for previous days
+                let previousDaysContainer = document.getElementById("previousDays");
+                let previousDaysHTML = ``;
+
+                // Define an array for weekday names
+                const weekdays = ["SØN", "MAN", "TIRS", "ONS", "TORS", "FRE", "LØR"];
+
+                // Loop through each day entry
+                spanDays.forEach(day => {
+                    let dayDate = day.getAttribute("data-date");
+
+                    if (dayDate === today) {
+                        day.classList.add("show-day"); // Highlight today's section
+                    }
+
+                    // Only add links for past days
+                    if (dayDate < today && dayDate < '2025-03-01') {
+                        let dateObj = new Date(dayDate);
+                        let dayName = weekdays[dateObj.getDay()]; // Get the weekday name
+                        previousDaysHTML += `<a href="#" class="daylinks" onclick="showDay(event, '${dayDate}')">${dayName}</a> `;
+                    }
+                });
+
+                // Only show the "I DAG" button after 22nd of February
+                if (today > '2025-02-22') {
+                    previousDaysHTML += `<a href="#" class="daylinks active-day-btn" onclick="showDay(event, '${today}')">I DAG</a>`;
+                }
+
+                // Update the previousDays section
+                previousDaysContainer.innerHTML = previousDaysHTML;
+
+                // Replace highscoretable divs with actual highscore tables
+                let highscoreTables = document.querySelectorAll(".highscoreTable");
+                highscoreTables.forEach(highscoreTable => highscoreTable.innerHTML = generateHighScoreTable());
+            });
+
+            // Function to show the correct day when clicking a link
+            function showDay(event, date) {
+                document.querySelectorAll("a.daylinks").forEach(daylink => {
+                    daylink.classList.remove("active-day-btn");
+                });
+                let sourceEl = (event.target) ? event.target : event.srcElement;
+                sourceEl.classList.add("active-day-btn");
+
+                document.querySelectorAll("span.day").forEach(day => {
+                    if (day.getAttribute("data-date") === date) {
+                        day.classList.add("show-day");
+                    } else {
+                        day.classList.remove("show-day");
+                    }
+                });
+            }
+
+            function generateHighScoreTable() {
+                let medals = ['🥇','🥈','🥉'];
+                let highscores = [
+                    { name: "Anita", score: 30 },
+                    { name: "Fredrik", score: 91 },
+                    { name: "Gunnhild", score: 79 },
+                    { name: "Jesper", score: 8 },
+                    { name: "Julie", score: 95 },
+                    { name: "Lars", score: 28 },
+                    { name: "Oddbjørn", score: 84 },
+                    { name: "Ove", score: 65 },
+                    { name: "Simen", score: 0 },
+                ];
+                let highscoresHtmlPrefix = '<table class="highscore">'
+                    + '<tr>'
+                    + '<th>Rank</th>'
+                    + '<th>Navn</th>'
+                    + '<th>Skår</th>'
+                    + '</tr>';
+                let highscoresHtml = highscores.sort((a, b) => b.score - a.score)
+                    .map((highscorer, i) => `<tr><td>${(i+1) + (medals[i] || '')}</td><td>${highscorer.name}</td><td>${highscorer.score}</td></tr>`)
+                    .join('');
+                let highscoresHtmlSuffix = '</table>'
+
+                return highscoresHtmlPrefix + highscoresHtml + highscoresHtmlSuffix;
+            }
+        </script>
+    </section>
+    
+    <section id="flights">
+        <h2>Flyinformasjon</h2>
+        <div class="flight-info-wrapper">
+            <div class="flight-detail-block">
+                <div class="flight-header">
+                    <div class="flight-header-icon">
+                        <i class="material-icons">flight_takeoff</i>
+                        <h5 class="flight-date">lø. 22 februar 2025</h5>
+                    </div>
+                    <p class="flight-info-caption">Norwegian<br/>DY1642</p>
+                </div>
+                <ul class="flight-time-list">
+                    <li class="flight-time-item departure-time">
+                        <p class="no-margin">11:00, Oslo Airport</p>
+                    </li>
+                    <li class="flight-time-item flight-duration">
+                        <p class="no-margin">Reisetid: 2 h 15 m</p>
+                    </li>
+                    <li class="flight-time-item departure-time">
+                        <p class="no-margin">13:15, Salzburg Airport</p>
+                    </li>
+                </ul>
+            </div>
+            <div class="flight-detail-block">
+                <div class="flight-header">
+                    <div class="flight-header-icon">
+                        <i class="material-icons" style="transform: scaleX(-1);">flight_takeoff</i>
+                        <h5 class="flight-date">lø. 1 mars 2025</h5>
+                    </div>
+                    <p class="flight-info-caption">Norwegian<br/>DY1643</p>
+                </div>
+                <ul class="flight-time-list">
+                    <li class="flight-time-item departure-time">
+                        <p class="no-margin">14:15, Salzburg Airport</p>
+                    </li>
+                    <li class="flight-time-item flight-duration">
+                        <p class="no-margin">Reisetid: 2 h 15 m</p>
+                    </li>
+                    <li class="flight-time-item departure-time">
+                        <p class="no-margin">16:30, Oslo Airport</p>
+                    </li>
+                </ul>
+            </div>
+            <p class="no-margin">Transit: ca. 1 h 30 m</p>
+        </div>
+    </section>
+
+    <section id="hotel">
+        <div class="carousel" width="100%">
+            <button class="prev" onclick="prevSlide()">&#9664;</button>
+            <img src="images/hotell/hotell1.webp" class="activepic" onclick="nextSlide()">
+            <img src="images/hotell/hotell2.webp" onclick="nextSlide()">
+            <img src="images/hotell/hotell3.webp" onclick="nextSlide()">
+            <img src="images/hotell/hotell4.webp" onclick="nextSlide()">
+            <img src="images/hotell/hotell5.webp" onclick="nextSlide()">
+            <img src="images/hotell/hotell6.webp" onclick="nextSlide()">
+            <img src="images/hotell/hotell7.webp" onclick="nextSlide()">
+            <img src="images/hotell/hotell8.webp" onclick="nextSlide()">
+            <img src="images/hotell/hotell9.webp" onclick="nextSlide()">
+            <button class="next" onclick="nextSlide()">&#9654;</button>
+        </div>
+        <h2><a href="https://www.alpereiser.no/skireiser/osterrike/saalbach/gasthof-unterwirt/" target="_blank">Gasthof Unterwirt - <b>klassisk alpehotell nært heisen</b></a></h2>
+        <h5><a href="https://maps.app.goo.gl/RKnsaadPzPVRKDKfA" target="_blank">📍 Unterdorf 31, 5753 Saalbach, Austria</a></h5>
+        <h5>Frokost: 07:30-10:00</h5>
+        <p>Gasthof Unterwirt er et godt likt og populært familieeid hotell, med absolutt beste beliggenhet i Saalbach. Hotellet er kjent for sitt hyggelige personale og hit vender mange gjester tilbake hver vinter. Det har vært eid og drevet av familien Kröll helt siden 1830, noe som har skapt en egen, familiær følelse. I dag er det Edith og Philip Kröll med familie som gjerne ønsker dere velkommen.</p>
+        <p>Hotellet ligger rett ved Schattberg Express-heisen og her ligger også skiskolen og skiutleien. Dessuten ligger landsbyens sentrum rett rundt hjørnet, med butikker, restauranter og barer. Trass i nærheten til alt, er det en stille og rolig beliggenhet.</p>
+        <p>Familien vil beholde hotellets sjarme og klassiske alpestil, samtidig som det utføres kontinuerlig utbedring. Mange av rommene er nyrenoverte og luftige, de fleste har også balkong.</p>
+        <p>Gasthof Unterwirt har en koselig atmosfære med store, hyggelige fellesområder samt egen bar og restaurant. I den koselige restauranten serveres det en god frokostbuffé hver morgen, med blant annet ferskt brød, lokale skinker, oster og egg.</p>
+        <p>Et stort pluss etter en lang dag i bakken er at de har en spaavdeling med et lite treningsrom, samt ulike typer badstuer der man kan koble av. Hotellet har også en skistall der man kan oppbevare skiutstyret sitt.</p>
+
+        <script>
+            let currentIndex = 0;
+            const images = document.querySelectorAll('.carousel img');
+            
+            function showSlide(index) {
+                images.forEach((img, i) => {
+                    img.classList.toggle('activepic', i === index);
+                });
+            }
+            
+            function nextSlide() {
+                currentIndex = (currentIndex + 1) % images.length;
+                showSlide(currentIndex);
+            }
+            
+            function prevSlide() {
+                currentIndex = (currentIndex - 1 + images.length) % images.length;
+                showSlide(currentIndex);
+            }
+        </script>
+    </section>
+    
+    <section id="dinner">
+        <h2>Planlagt middag</h2>
+        <div class="dinner-day" data-date="2025-02-22">
+            <h3><a href="https://www.tripadvisor.com/Restaurant_Review-g608663-d2534306-Reviews-Restaurant_Del_Rossi-Saalbach_Hinterglemm_Austrian_Alps.html?m=69573" target="_blank">Lørdag 22.02.2025 - Del Rossi</a></h3>
+            <h5><a href="https://maps.app.goo.gl/6taevrbqXQHZ47Sv5" target="_blank">📍 Schulstraße 347, 5753 Saalbach, Austria</a></h5>
+            <p>Booking kl. 18:30</p>
+            <p>Restaurant Del Rossi er kjent for sin varierte meny som inkluderer biffer, carpaccio, pasta, tradisjonell østerriksk mat som Wiener Schnitzel, samt hamburgere og pizza.</p>
+            <p>Den ligger i gågaten i Saalbach og har en hyggelig atmosfære med både innendørs og utendørs sitteplasser.</p>
+        </div>
+    
+        <div class="dinner-day" data-date="2025-02-23">
+            <h3><a href="https://www.tripadvisor.com/Restaurant_Review-g608663-d13189629-Reviews-S_Wirtshaus-Saalbach_Hinterglemm_Austrian_Alps.html" target="_blank">Søndag 23.02.2025 - s'Wirtshaus</a></h3>
+            <h5><a href="https://maps.app.goo.gl/bJDCkNyuqjDTwv6W6" target="_blank">📍 Dorfpl. 27, 5753 Saalbach, Austria</a></h5>
+            <p>Booking kl. 20:00</p>
+            <p>s'Wirtshaus er en populær restaurant som tilbyr en blanding av tradisjonelle østerrikske retter og moderne vegetariske alternativer.</p>
+            <p>Restauranten har en koselig atmosfære med mye tradisjon og minner. De serverer blant annet biffer, kjøtt- og ostefonduer, samt typiske østerrikske retter. Det finnes også vegetariske, veganske og glutenfrie alternativer.</p>
+        </div>
+
+        <div class="dinner-day" data-date="2025-02-24">
+            <h3><a href="https://www.wechselberger.at/restaurant/" target="_blank">Mandag 24.02.2025 - Hotel Wechselberger</a></h3>
+            <h5><a href="https://maps.app.goo.gl/vgn4MBvsU4ctV73x5" target="_blank">📍 Oberdorf 178, 5753 Saalbach, Austria</a></h5>
+            <p>Booking kl. 19:30</p>
+            <p>Et sted for ekte kjennerne – i vår koselige restaurant i hjertet av Saalbach blir du skjemt bort med typiske regionale delikatesser og viltretter fra våre egne jaktmarker.</p>
+            <p>Nyt en hyggelig middag og la deg bli bortskjemt med retter tilberedt med østerrikske ingredienser. For å komplettere de ulike delikatessene serverer vi utsøkte viner fra Østerrike og de mest berømte vinregionene fra hele verden.</p>
+        </div>
+
+        <div class="dinner-day" data-date="2025-02-25">
+            <h3><a href="https://www.gold-pepper.at/en/" target="_blank">Tirsdag 25.02.2025 - Gold & Pepper</a></h3>
+            <h5><a href="https://maps.app.goo.gl/cHxezggm25JcZYAT9" target="_blank">📍 Schulstraße 29, Saalbach-Hinterglemm, AT 5753</a></h5>
+            <p>Booking kl. 20:00</p>
+            <p>Gold & Pepper, ligger midt i Saalbach,. Med stor entusiasme løfter de ferske, lokale råvarer ved hjelp av middelhavsurter og ingredienser.</p>
+            <p>De forener utsøkt kvalitet og tolker alpine oppskrifter med middelhavspasjon.</p>
+            <p>Med dette i tankene finner du klassikere på menyen, inkludert biff-tartar, Charolais indrefilet og wienerschnitzel av kalv, sammen med kamskjell, burrata og persillerisotto.</p>
+            <p>Hver eneste rett er laget med kjærlighet og tid – og en liten klype lidenskapelig Amore.</p>
+        </div>
+
+        <div class="dinner-day" data-date="2025-02-26">
+            <h3><a href="https://www.tripadvisor.com/Restaurant_Review-g608663-d20300571-Reviews-Pizzeria_Restaurant_Parma-Saalbach_Hinterglemm_Austrian_Alps.html" target="_blank">Onsdag 26.02.2025 - Pizzeria-Restaurant Parma</a></h3>
+            <h5><a href="https://maps.app.goo.gl/5YWXHJhurcyUcWm99" target="_blank">📍 Oberdorf 771, Saalbach-Hinterglemm I-5753, Austria</a></h5>
+            <p>Booking kl. 20:00</p>
+            <p>Pizzeria-Restaurant Parma i Saalbach-Hinterglemm, Østerrike, er en populær italiensk restaurant kjent for sine autentiske pizzaer og pastaretter.</p>
+        </div>
+
+        <div class="dinner-day" data-date="2025-02-27">
+            <h3><a href="https://www.astrid.at/en/hotel-astrid/culinary" target="_blank">Torsdag 27.02.2025 - Hotel Astrid</a></h3>
+            <h5><a href="https://maps.app.goo.gl/Rd46PrKfiC6WDHuGA" target="_blank">📍 Kohlmaisliftweg 626, 5753 Saalbach, Austria</a></h5>
+            <p>Booking kl. 19:30</p>
+            <p>Jordnær, kreativ og allsidig – slik smaker kjøkkenet på Hotel Astrid.</p>
+            <p>Se frem til et variert utvalg av retter, en koselig atmosfære i restauranten Saalbach 626 og stor kulinarisk fleksibilitet – perfekt for hyggelige stunder i hjertet av SalzburgerLand.</p>
+        </div>
+
+        <div class="dinner-day" data-date="2025-02-28">
+            <h3><a href="https://www.tripadvisor.com/Restaurant_Review-g608663-d13189629-Reviews-S_Wirtshaus-Saalbach_Hinterglemm_Austrian_Alps.html" target="_blank">Fredag 28.02.2025 - s'Wirtshaus</a></h3>
+            <h5><a href="https://maps.app.goo.gl/bJDCkNyuqjDTwv6W6" target="_blank">📍 Dorfpl. 27, 5753 Saalbach, Austria</a></h5>
+            <p>Booking kl. 20:00</p>
+            <p>s'Wirtshaus er en populær restaurant som tilbyr en blanding av tradisjonelle østerrikske retter og moderne vegetariske alternativer.</p>
+            <p>Restauranten har en koselig atmosfære med mye tradisjon og minner. De serverer blant annet biffer, kjøtt- og ostefonduer, samt typiske østerrikske retter. Det finnes også vegetariske, veganske og glutenfrie alternativer.</p>
+        </div>
+        
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                // Get today's date in YYYY-MM-DD format
+                let today = new Date().toISOString().split('T')[0];
+        
+                // Select all dinner-day elements
+                let dinnerDays = document.querySelectorAll(".dinner-day");
+        
+                // Loop through each dinner entry
+                dinnerDays.forEach(day => {
+                    if (day.getAttribute("data-date") === today) {
+                        day.classList.add("highlight-today"); // Add highlight class
+                    }
+                });
+            });
+        </script>
+        
+    </section>
+    
+    <section id="bars">
+        <h2>Barer & Afterski</h2>
+        <div class="bars-container">
+            <!-- Bar 1 -->
+            <div class="bar-card">
+                <img src="images/bars/hinterhag-alm.png" alt="Hinterhag Alm">
+                <div class="bar-info">
+                    <h3><a href="https://www.tripadvisor.com/Restaurant_Review-g608663-d3970430-Reviews-Hinterhag_Alm-Saalbach_Hinterglemm_Austrian_Alps.html" target="_blank">Hinterhag Alm</a></h3>
+                    <p>Dette er en av de mest ikoniske afterskiplassene i Saalbach. Ligger rett ved pisten og tilbyr en fantastisk atmosfære med livemusikk og dans.</p>
+                    <p><a href="https://maps.app.goo.gl/35yELXc3BH3GUcRe8" target="_blank">📍 Hinterhagweg 43, 5753 Saalbach, Austria</a></p>
+                </div>
+            </div>
+    
+            <!-- Bar 2 -->
+            <div class="bar-card">
+                <img src="images/bars/soul-house-at-pist-46.jpg" alt="Soul House">
+                <div class="bar-info">
+                    <h3><a href="https://www.tripadvisor.com/Restaurant_Review-g608663-d2534297-Reviews-Soul_House-Saalbach_Hinterglemm_Austrian_Alps.html" target="_blank">Soul House</a></h3>
+                    <p>En populær afterskiplass ved Bernkogelbahn med DJ-er, skandinaviske liveband og god mat.</p>
+                    <p><a href="https://maps.app.goo.gl/uJtB7PhRVhnM4NXKA" target="_blank">📍 Eberhartweg 135, 5753 Saalbach, Austria</a></p>
+                </div>
+            </div>
+    
+            <!-- Bar 3 -->
+            <div class="bar-card">
+                <img src="images/bars/Bauers_schi_alm_Saalbach.jpg" alt="Bauer’s Schi-Alm">
+                <div class="bar-info">
+                    <h3><a href="https://www.tripadvisor.com/Restaurant_Review-g608663-d4086173-Reviews-Bauer_s_Skialm-Saalbach_Hinterglemm_Austrian_Alps.html?m=69573" target="_blank">Bauer’s Schi-Alm</a></h3>
+                    <p>En populær afterskibar med DJ-musikk og en pulserende atmosfære som tiltrekker både lokale og besøkende.</p>
+                    <p><a href="https://maps.app.goo.gl/rbyQvdcVvYLfGsVr5" target="_blank">📍 Skiliftstraße 542, 5753 Saalbach, Austria</a></p>
+                </div>
+            </div>
+    
+            <!-- Bar 4 -->
+            <div class="bar-card">
+                <img src="images/bars/taverne.png" alt="Taverne">
+                <div class="bar-info">
+                    <h3>Taverne</h3>
+                    <p>En koselig afterskibar som byr på livemusikk og en avslappet stemning i hjertet av Saalbach.</p>
+                    <p><a href="https://maps.app.goo.gl/WKTe14ApRHEX4tQc8" target="_blank">📍 Oberdorf 182, 5753 Saalbach, Austria</a></p>
+                </div>
+            </div>
+    
+            <!-- Bar 5 -->
+            <div class="bar-card">
+                <img src="images/bars/schwips_bar.webp" alt="Schwips Bar">
+                <div class="bar-info">
+                    <h3><a href="https://www.schwips-bar.at/" target="_blank">Schwips Bar</a></h3>
+                    <p>En livlig afterskiplass som kombinerer bar, klubb og table dance med en festlig atmosfære.</p>
+                    <p><a href="https://maps.app.goo.gl/Db81hCH53C87z2ZaA" target="_blank">📍 Schulstraße 739, 5753 Saalbach, Austria</a></p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    
+    <section id="map">
+        <h2>Skikart</h2>
+        <p><a href="images/skiresort/skimap.jpg" target="_blank">Trykk for å åpne i nettleser</a></p>
+        <div class="map-container">
+            <img id="ski-map" src="images/skiresort/skimap.jpg" alt="Ski Resort Map">
+            <div id="zoomed-map"></div>
+        </div>
+        <p>Heisene åpner fra kl. 08:00 og ut.<br/><a href="https://www.saalbach.com/en/winter/ski-resort/operating-hours" target="_blank">Se nettsiden deres for detaljer.</a></p>
+        
+        <h4>Løypeforslag</h4>
+
+        <div>
+            <h4>Easy</h4>
+            <ul>
+                <li>Turmwiese: Ligger i sentrum av Saalbach og er perfekt for nybegynnere. Denne løypen har en jevn gradient og gir en vakker utsikt over Saalbach.</li>
+                <li>Nybegynnerområdet i Hinterglemm: Dette området har flate løyper som er lett tilgjengelige med trekkheiser. Perfekt for de som tar sine første svinger.</li>
+                <li>Øvre del av Bernkogel: Denne delen av Bernkogel er veldig flat og gir en flott panoramautsikt. Du kan også variere med løypene rundt G3 Wetterkreuz.</li>
+                <li>Løyper nær dalen i Leogang: Spesielt den venstre løypen ved L12 Schanteilift er godt egnet for nybegynnere.</li>
+                <li>Streuböden-området i Fieberbrunn: Dette området tilbyr flate og brede løyper som er ideelle for nybegynnere.</li>
+            </ul>
+        </div>
+
+        <div>
+            <h4>Medium</h4>
+            <ul>
+                <li>Schattberg Ost: Løype 2a er en rød løype som byr på en utfordrende og variert nedfart fra toppen av Schattberg til Hinterglemm.</li>
+                <li>Zwölferkogel: Denne fjelltoppen har flere røde løyper som gir en god blanding av utfordringer og naturskjønn utsikt. Løype 11 er spesielt populær.</li>
+                <li>Kohlmais: Området rundt Kohlmais tilbyr flere røde løyper som er perfekte for viderekommende. Løype 51 er en favoritt blant mange.</li>
+                <li>Hochalm: Dette området har brede og godt preparerte røde løyper som gir en flott skikjøringsopplevelse for viderekommende.</li>
+                <li>Reiterkogel: Løype 32 er en rød løype som gir en fin balanse mellom utfordring og moro, med flotte utsikter over dalen.</li>
+            </ul>
+        </div>
+        
+        <div>
+            <h4>Hard</h4>
+            <ul>
+                <li>Zwölferkogel Nord: Denne svarte løypen er kjent for sin bratte og ofte isete nedfart, som virkelig setter ferdighetene dine på prøve.</li>
+                <li>Schattberg Nord: Løype 1 er en utfordrende svart løype som byr på en spennende nedfart med fantastisk utsikt.</li>
+                <li>Schattberg West: Denne løypen er den lengste i området, med en lengde på 7 km og en høydeforskjell på 1 010 meter. Perfekt for de som søker en lang og krevende nedfart.</li>
+                <li>Freeride-ruten på Zwölferkogel: For de som liker off-piste, er denne ruten et must. Den byr på variert terreng og spektakulær utsikt over dalen.</li>
+                <li>Ski-ruten på Schattberg Ost: En spennende nedfart gjennom skogen som gir en adrenalinfylt opplevelse.</li>
+            </ul>
+        </div>
+
+        <p><img src="images/skiresort/skiinfo.png"></p>
+        <script>
+            const map = document.getElementById("ski-map");
+            const zoomedMap = document.getElementById("zoomed-map");
+
+            function moveZoom(event) {
+                event.preventDefault(); // Prevents scrolling when moving finger
+                const rect = map.getBoundingClientRect();
+                let x, y;
+
+                if (event.touches) {
+                    x = event.touches[0].clientX - rect.left;
+                    y = event.touches[0].clientY - rect.top;
+                } else {
+                    x = event.clientX - rect.left;
+                    y = event.clientY - rect.top;
+                }
+
+                const xPercent = (x / rect.width) * 100;
+                const yPercent = (y / rect.height) * 100;
+
+                // Adjust zoomed view position: centered horizontally, above the finger/mouse
+                zoomedMap.style.left = `${x - zoomedMap.offsetWidth / 2}px`;
+                zoomedMap.style.top = `${y - zoomedMap.offsetHeight}px`;
+
+                // Adjust background position to match the point under the finger/mouse
+                zoomedMap.style.backgroundPosition = `${xPercent}% ${yPercent}%`;
+            }
+
+            function showZoom(event) {
+                event.preventDefault(); // Prevent scrolling on touch start
+                zoomedMap.style.display = "block";
+                moveZoom(event);
+            }
+
+            function hideZoom() {
+                zoomedMap.style.display = "none";
+            }
+
+            // Mouse Events (Desktop)
+            map.addEventListener("mouseenter", showZoom);
+            map.addEventListener("mousemove", moveZoom);
+            map.addEventListener("mouseleave", hideZoom);
+
+            // Touch Events (Mobile)
+            map.addEventListener("touchstart", (e) => {
+                e.preventDefault(); // Prevents accidental scrolling
+                showZoom(e);
+            }, { passive: false });
+
+            map.addEventListener("touchmove", (e) => {
+                e.preventDefault(); // Stops scrolling while moving finger
+                moveZoom(e);
+            }, { passive: false });
+
+            map.addEventListener("touchend", hideZoom);
+        </script>
+    </section>
+    
+    <section id="challenges">
+        <h2>Chællenge!</h2>
+        <p>Nytt av året. Utfordringer for alle og enhver.</p>
+        <div>
+            <h4>Slik får du poeng:</h4>
+            📸 Fullført challenge: 5 poeng<br/>
+            🤣 Ekstra morsomt bilde: +3 poeng<br/>
+            🎭 Kreativ vri på utfordringen: +2 poeng<br/>
+            🚫 Ikke fullført challenge: -0 poeng<br/>
+            <b>Bilder sendes fortløpende til Miriam i den gule appen</b>
+        </div>
+        <div>
+            <h4>
+                Chællenges
+            </h4>
+            <ul class="styled-list">
+                <li>
+                    <input type="checkbox" id="challenge-1" data-id="1">
+                    <label for="challenge-1">Ta et bilde av noen som sover (bonuspoeng for morsom sovestilling)</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="challenge-2" data-id="2">
+                    <label for="challenge-2">Ta en selfie med en skiløper i en HELT annen outfit enn deg (f.eks. noen i retro-antrekk eller full racingdrakt)</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="challenge-3" data-id="3">
+                    <label for="challenge-3">Ta et bilde der du later som du har satt deg fast i snøen</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="challenge-4" data-id="4">
+                    <label for="challenge-4">Ta en “superhelt-landing” i snøen etter et hopp</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="challenge-5" data-id="5">
+                    <label for="challenge-5">Fang det morsomste skiltet eller advarselen du ser i bakken</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="challenge-6" data-id="6">
+                    <label for="challenge-6">Ta et bilde av noen i gruppa som drikker med skibrillene på</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="challenge-7" data-id="7">
+                    <label for="challenge-7">Bilde av en hel gruppe som skåler – helst med en fremmed med i bildet</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="challenge-8" data-id="8">
+                    <label for="challenge-8">Ta et bilde av en ny venn dere møter på afterski</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="challenge-9" data-id="9">
+                    <label for="challenge-9">Fang det rareste dance-movet på dansegulvet</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="challenge-10" data-id="10">
+                    <label for="challenge-10">Finn en person med en skikkelig kul (eller merkelig) lue og ta et bilde med dem</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="challenge-11" data-id="11">
+                    <label for="challenge-11">Ta et bilde av deg selv med den beste utsikten på turen</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="challenge-12" data-id="12">
+                    <label for="challenge-12">Fang et ekte “filmøyeblikk” – noen som ler, skåler eller gjør noe spontant og gøy</label>
+                </li>
+            </ul>
+        </div>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const checkboxes = document.querySelectorAll(".styled-list input[type='checkbox']");
+    
+                // Load saved checkbox state
+                checkboxes.forEach(checkbox => {
+                    const id = checkbox.dataset.id;
+                    const checked = localStorage.getItem(`challenge-${id}`) === "true";
+                    checkbox.checked = checked;
+                });
+    
+                // Save state of each checkbox when saved
+                checkboxes.forEach(checkbox => {
+                    checkbox.addEventListener("change", function () {
+                        localStorage.setItem(`challenge-${this.dataset.id}`, this.checked);
+                    });
+                });
+            });
+        </script>
+    </section>
+    
+    <section id="history">
+        <h2>Historie</h2>
+        <ul class="cool-list">
+            <li>2005: St. Anton, Østerrike (VM i Oberstdorf)</li>
+            <li>2006: Serre Chevalier, Frankrike (OL i Torino)</li>
+            <li>2007: Canazei, Italia</li>
+            <li>2008: Zermatt, Sveits</li>
+            <li>2009: Val Thorens, Frankrike</li>
+            <li>2010: Val d'Isere, Frankrike</li>
+            <li>2011: Chamonix, Frankrike</li>
+            <li>2013: Canazei, Italia (VM i Val di Fiemme)</li>
+            <li>2015: Whistler, Canada (Julie og Fred) </li>
+            <li>2016: Tignes, Frankrike</li>
+            <li>2017: Zauchensee, Østerrike</li>
+            <li>2018: Schladming, Østerrike</li>
+            <li>2019: St. Anton, Østerrike (VM i Seefeld) </li>
+            <li>2020: Cervinia, Italia</li>
+            <li>2023: Bad Gastein, Østerrike</li>
+            <li>2024: Val Gardena, Italia</li>
+            <li>2025: Saalbach, Østerrike</li>
+            <li><a href="../index.html">2026: Morzine, Frankrike</a></li>
+        </ul>
+    </section>
+    
+    <nav>
+        <ul>
+            <li><a href="#today" class="active">📆</a></li>
+            <li><a href="#flights">✈️</a></li>
+            <li><a href="#hotel">🏨</a></li>
+            <li><a href="#dinner">🍽️</a></li>
+            <li><a href="#bars">🍻</a></li>
+            <li><a href="#map">🗺️</a></li>
+            <li><a href="#challenges">🏆</a></li>
+            <li><a href="#history">📚</a></li>
+        </ul>
+
+        <script>
+            document.querySelectorAll('nav a').forEach(anchor => {
+                anchor.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    
+                    // Scroll to the top of the page
+                    window.scrollTo(0, 0);
+        
+                    // Remove the "active" class from all sections and nav links
+                    document.querySelectorAll('section').forEach(sec => sec.classList.remove('active'));
+                    document.querySelectorAll('nav a').forEach(link => link.classList.remove('active'));
+        
+                    // Add the "active" class to the section linked
+                    const targetSection = document.querySelector(this.getAttribute('href'));
+                    if (targetSection) {
+                        targetSection.classList.add('active');
+                    }
+        
+                    // Highlight the active nav link
+                    this.classList.add('active');
+                });
+            });
+        </script>
+        
+    </nav>
+    
+    <!-- Share Modal -->
+    <div id="share-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeShareModal()">&times;</span>
+            <img src="images/QR_CODE.png" alt="QR Code" class="qr-image">
+        </div>
+    </div>
+    <div id="ios-install-modal" class="ios-modal">
+        <div class="ios-modal-content">
+            <span class="ios-close-btn" onclick="closeIosInstallModal()">&times;</span>
+            <h1 class="ios-modal-title">Legg til på hjem-skjerm</h1>
+            <p class="ios-modal-description">Følg disse stegene for å installere appen:</p>
+            <ul class="ios-instructions-list">
+                <li class="ios-instruction">
+                    <span class="ios-icon material-icons">ios_share</span>
+                    <span class="ios-instruction-text">Trykk på del-knappen øverst i høyre hjørne.</span>
+                </li>
+                <li class="ios-instruction">
+                    <span class="ios-icon material-icons">add_box</span>
+                    <span class="ios-instruction-text">Velg "Legg til på hjem-skjerm"</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <script>
+        function openShareModal() {
+            document.getElementById("share-modal").style.display = "flex";
+        }
+
+        function closeShareModal() {
+            document.getElementById("share-modal").style.display = "none";
+        }
+
+        function openIosInstallModal() {
+            let modal = document.getElementById("ios-install-modal");
+            modal.style.display = "flex";
+            
+            // Small delay to ensure transition applies
+            setTimeout(() => {
+                modal.classList.add("flex");
+            }, 10);
+        }
+
+        function closeIosInstallModal() {
+            let modal = document.getElementById("ios-install-modal");
+            modal.classList.remove("flex");
+
+            // Wait for animation to finish before hiding
+            setTimeout(() => {
+                modal.style.display = "none";
+            }, 300);
+        }
+
+        // Close modal if clicking outside the content
+        window.onclick = function(event) {
+            let iosModal = document.getElementById("ios-install-modal");
+            if (event.target === iosModal) {
+                closeIosInstallModal();
+            }
+            let shareModal = document.getElementById("share-modal");
+            if (event.target === shareModal) {
+                closeShareModal();
+            }
+        };
+    </script>
+</body>
+</html>
+<!--
+TODO:
+- (neste år?) Deling av posisjon i app, og visning av posisjon til deltakere
+- GPS om hvor alle med app er
+- Laste opp bilder i appen
+- Status i appen (i bakken, på afterski, på rommet)
+- Formbarometer
+-->
