@@ -8,12 +8,12 @@
     "theme_color": "#007AFF",
     "icons": [
       {
-        "src": "icons/Alpeskrull_ski_192.png",
+        "src": "icons/alpeskrull_logo_192x192.png",
         "sizes": "192x192",
         "type": "image/png"
       },
       {
-        "src": "icons/Alpeskrull_ski_512.png",
+        "src": "icons/alpeskrull_logo_512x512.png",
         "sizes": "512x512",
         "type": "image/png"
       }
