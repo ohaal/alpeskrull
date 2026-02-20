@@ -736,7 +736,7 @@
         </a>
         <div id="previousDays">
         </div>
-        <span class="day" data-date="2025-02-22"><!-- lørdag -->
+        <span class="day" data-date="2026-02-21"><!-- lørdag -->
             <h2>Velkommen!</h2>
             <p>Endelig er vi samlet igjen for den 17. turen siden 2005 – en tradisjon like sterk som afterski og vonde leggær og lår! 😆</p>
             <p>Denne gangen venter seks dager med puddersnø (slapseføre), spektakulære fjell, god mat og selvfølgelig legendariske afterski-øyeblikk.</p>
@@ -756,7 +756,6 @@
             </p>
         </span>
 
-        <span class="day" data-date="2025-02-23"><!-- søndag -->
             <h2>Første dag i løypa!</h2>
             <p>"Kor ska me gjør av oss kor ska me gå?".</p>
             <p>Første dag i Saalbach og bakken venter på deg!</p>
@@ -764,18 +763,19 @@
             <p>De første heisene åpner klokken 08:00, så vi har ingen tid å miste!⛷️ Sjekk 🗺️ i appen for mer info.</p>
             <p>Krysser fingrene for at Julie sitt ben holder og at hun får kjørt med de store gutta 🤞</p>
             <p><b>Funfact:</b> Visste du at Saalbach er kjent som 'Home of Lässig', som betyr "hjemmet til avslappet moro"?</p>
+        <span class="day" data-date="2026-02-22"><!-- søndag -->
         </span>
 
-        <span class="day" data-date="2025-02-24"><!-- mandag -->
             <h2>Endelig mandag!</h2>
             <p>Ny dag gir nye muligheter til å utforske flere av løypene i Saalbach!</p>
             <p>Etter tredobbelt norsk i skiskyting ble feiringen litt for mye for enkelte av oss. Heldigvis falt kveldsmaten i smak. 😵‍💫</p>
             <p>Vi erfarte i går at det er om å gjøre å få kjørt så mye som mulig før lunsj, så planen i dag blir deretter.</p>
+        <span class="day" data-date="2026-02-23"><!-- mandag -->
             <p><b>Funfact:</b> Det går gratis skibusser mellom Saalbach og Hinterglemm, noe som gjør det enkelt å komme seg rundt.</p>
             <p><i>men du, glöm inte titta på solen, det är gratis!</i> ☀️</p>
         </span>
 
-        <span class="day" data-date="2025-02-25"><!-- tirsdag -->
+        <span class="day" data-date="2026-02-24"><!-- tirsdag -->
             <h2>Snømagi</h2>
             <p>"Tirsdag er en ny sjanse til å gjøre fremskritt og nå dine mål."</p>
             <p>Har du tatt en pinne for landet og sunget om søte Caroline? Hvis ikke er det på tide!</p>
@@ -784,7 +784,7 @@
         </span>
 
 
-        <span class="day" data-date="2025-02-26"><!--onsdag -->
+        <span class="day" data-date="2026-02-25"><!--onsdag -->
             <h2>Hællæ Youtube</h2>
             <p>Onsdag er en dag for å reflektere.</p>
             <p>Hvis vi nå begynner å bli tomme for samtaleemner, så ta en prat med Ove, han har nok noen skrevet ned på en lapp i lomma si 🤓</p>
@@ -794,7 +794,7 @@
             <p><a href="images/forelopig_highscore.png" target="_blank">Se oversikt her</a></p>
         </span>
 
-        <span class="day" data-date="2025-02-27"><!-- torsdag -->
+        <span class="day" data-date="2026-02-26"><!-- torsdag -->
             <h2>Eventyrdag</h2>
             <p>Vi ønsker tøffingene lykke til på The Challenge.</p>
             <p>Vi andre må finne oss en lunsjplass for å se på Klæbo gå inn til gull rett foran Edvin fra Sverige kl 12:30.</p>
@@ -806,7 +806,7 @@
             <p><a href="images/forelopig_highscore.png" target="_blank">Se oversikt her</a></p>
         </span>
 
-        <span class="day" data-date="2025-02-28"><!-- fredag -->
+        <span class="day" data-date="2026-02-27"><!-- fredag -->
             <h2>TGIF!</h2>
             <p>Du merker det kanskje godt i låra? Det er lov å være litt sliten nå. Husk det er snart helg 🥳</p>
 	        <p>"Suksess er ikke endelig, fiasko er ikke fatalt: Det er motet til å fortsette som teller." – Winston Churchill</p>
@@ -814,7 +814,7 @@
             <img src="https://media1.tenor.com/m/OXiCH_Jq6BUAAAAd/ski.gif" alt="Sitteski">
         </span>
 
-        <span class="day" data-date="2025-03-01"><!-- reisedag -->
+        <span class="day" data-date="2026-02-28"><!-- reisedag -->
             <p><img src="images/diplom.png" alt="Diplom"></p>
             <p>Etter en heftig innspurt snappet Julie en knepen seier foran en lilla teletubby.</p>
             <p>Vi i redaksjonen takker for engasjementet, det hadde ikke blitt det samme uten deres bidrag.</p>
@@ -827,7 +827,7 @@
                 // Get today's date in YYYY-MM-DD format
                 let today = new Date().toISOString().split('T')[0];
 
-                if (today > '2025-03-01' || today < '2025-02-22') today = '2025-03-01';
+                if (today > '2026-02-28' || today < '2026-02-21') today = '2026-02-28';
 
                 // Select all day elements
                 let spanDays = document.querySelectorAll("span.day");
@@ -848,7 +848,7 @@
                     }
 
                     // Only add links for past days
-                    if (dayDate < today && dayDate < '2025-03-01') {
+                    if (dayDate < today && dayDate < '2026-02-28') {
                         let dateObj = new Date(dayDate);
                         let dayName = weekdays[dateObj.getDay()]; // Get the weekday name
                         previousDaysHTML += `<a href="#" class="daylinks" onclick="showDay(event, '${dayDate}')">${dayName}</a> `;
@@ -856,7 +856,7 @@
                 });
 
                 // Only show the "I DAG" button after 22nd of February
-                if (today > '2025-02-22') {
+                if (today > '2026-02-21') {
                     previousDaysHTML += `<a href="#" class="daylinks active-day-btn" onclick="showDay(event, '${today}')">I DAG</a>`;
                 }
 
@@ -888,14 +888,14 @@
             function generateHighScoreTable() {
                 let medals = ['🥇','🥈','🥉'];
                 let highscores = [
-                    { name: "Anita", score: 30 },
-                    { name: "Fredrik", score: 91 },
-                    { name: "Gunnhild", score: 79 },
-                    { name: "Jesper", score: 8 },
-                    { name: "Julie", score: 95 },
-                    { name: "Lars", score: 28 },
-                    { name: "Oddbjørn", score: 84 },
-                    { name: "Ove", score: 65 },
+                    { name: "Anita", score: 0 },
+                    { name: "Fredrik", score: 0 },
+                    { name: "Gunnhild", score: 0 },
+                    { name: "Jesper", score: 0 },
+                    { name: "Julie", score: 0 },
+                    { name: "Lars", score: 0 },
+                    { name: "Oddbjørn", score: 0 },
+                    { name: "Ove", score: 0 },
                     { name: "Simen", score: 0 },
                 ];
                 let highscoresHtmlPrefix = '<table class="highscore">'
