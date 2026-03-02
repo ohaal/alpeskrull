@@ -861,6 +861,7 @@
             </p>
             <p>Endelig resultat kommer senere i dag når redaksjonen får tilgang til en PC.</p>
             <img src="https://media1.tenor.com/m/mmE5sZqVPOEAAAAd/oh-wow-you-dont-say.gif"/>
+            <div class="highscoreTable"></div>
             <!--
             <p><img src="images/diplom.png" alt="Diplom"></p>
             <p>Etter en heftig innspurt snappet Julie en knepen seier foran en lilla teletubby.</p>
@@ -936,15 +937,12 @@
             function generateHighScoreTable() {
                 let medals = ['🥇','🥈','🥉'];
                 let highscores = [
-                    { name: "Anita", score: 0 },
-                    { name: "Fredrik", score: 0 },
-                    { name: "Gunnhild", score: 0 },
-                    { name: "Jesper", score: 0 },
-                    { name: "Julie", score: 0 },
-                    { name: "Lars", score: 0 },
-                    { name: "Oddbjørn", score: 0 },
-                    { name: "Ove", score: 0 },
-                    { name: "Simen", score: 0 },
+                    { name: "Anita", score: 26 },
+                    { name: "Fredrik", score: 96 },
+                    { name: "Gunnhild", score: 70 },
+                    { name: "Julie", score: 90 },
+                    { name: "Lars", score: 30 },
+                    { name: "Ove", score: 43 }
                 ];
                 let highscoresHtmlPrefix = '<table class="highscore">'
                     + '<tr>'
@@ -1336,7 +1334,7 @@
                 // Save state of each checkbox when saved
                 checkboxes.forEach(checkbox => {
                     checkbox.addEventListener("change", function () {
-                        localStorage.setItem(`challenge-${this.dataset.id}`, this.checked);
+                        localStorage.setItem(`challenge2026-${this.dataset.id}`, this.checked);
                     });
                 });
             });
